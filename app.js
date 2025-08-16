@@ -1202,10 +1202,19 @@ function updateAdminUI() {
                     } else {
                         products.forEach((p, idx) => {
                             const row = tbody.insertRow();
-                            row.innerHTML = `<td>${studentName}</td><td>Buổi ${p.session}</td><td>${renderTruncated(feedbackToText(p))}</td><td><button class="btn admin-only" onclick="openEditFromClass('${studentName}', ${idx})">Sửa</button></td>`;
+                            if (idx === 0) {
+                                const nameCell = row.insertCell();
+                                nameCell.rowSpan = products.length;
+                                nameCell.textContent = studentName;
+                            }
+                            row.insertCell().textContent = `Buổi ${p.session}`;
+                            row.insertCell().innerHTML = renderTruncated(feedbackToText(p));
+                            const actionCell = row.insertCell();
+                            actionCell.innerHTML = `<button class="btn admin-only" onclick="openEditFromClass('${studentName}', ${idx})">Sửa</button>`;
+                            if (idx === products.length - 1) {
+                                actionCell.innerHTML += ` <button class="btn admin-only" onclick="openAddFromClass('${studentName}')">Thêm</button>`;
+                            }
                         });
-                        const addRow = tbody.insertRow();
-                        addRow.innerHTML = `<td>${studentName}</td><td colspan="2"></td><td><button class="btn admin-only" onclick="openAddFromClass('${studentName}')">Thêm</button></td>`;
                     }
                 });
             }
@@ -1587,6 +1596,16 @@ function updateAdminUI() {
 
             // Khởi tạo ứng dụng
             init();
+
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.addEventListener('keydown', e => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        performSearch();
+                    }
+                });
+            }
         });
 
         // Thêm các phím tắt
