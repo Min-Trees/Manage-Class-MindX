@@ -81,6 +81,96 @@
             min-height: 500px;
         }
 
+        .search-container {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 18px;
+        }
+
+        .search-filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .clear-filters-btn {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid #ddd;
+            padding: 6px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .clear-filters-btn:hover {
+            background: white;
+            border-color: #667eea;
+        }
+
+        .search-stats {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
         .class-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -232,6 +322,7 @@
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
             cursor: pointer;
+            position: relative;
         }
 
         .student-card:hover {
@@ -245,12 +336,43 @@
             font-size: 1.2em;
         }
 
+        .student-class-badge {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            margin-bottom: 8px;
+            display: inline-block;
+            font-weight: bold;
+        }
+
         .product-count {
             background: rgba(255, 255, 255, 0.7);
             padding: 5px 15px;
             border-radius: 15px;
             font-size: 0.9em;
             color: #666;
+        }
+
+        .highlight {
+            background: rgba(255, 235, 59, 0.3);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .no-results i {
+            font-size: 3em;
+            margin-bottom: 15px;
+            display: block;
+            opacity: 0.5;
         }
 
         .product-table {
@@ -370,6 +492,15 @@
                 flex-direction: column;
             }
             
+            .search-filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-item {
+                justify-content: space-between;
+            }
+            
             .product-table {
                 font-size: 14px;
             }
@@ -388,31 +519,52 @@
             <div class="nav">
                 <button class="nav-btn active" onclick="showHome()">🏠 Trang chủ</button>
                 <button class="nav-btn" onclick="showAllStudents()">👥 Tất cả học viên</button>
+                <button class="nav-btn" onclick="showSearchPage()">🔍 Tìm kiếm</button>
+                <button class="nav-btn" onclick="showAddClassModal()">➕ Thêm lớp</button>
                 <button class="nav-btn" onclick="exportData()">📊 Xuất Excel</button>
+                <button class="nav-btn" onclick="showImportModal()">📁 Nhập Excel</button>
             </div>
         </div>
 
         <div class="content">
             <!-- Trang chủ -->
             <div id="home-page">
-                <h2>Các lớp học đang giảng dạy</h2>
-                <div class="class-grid">
-                    <div class="class-card" onclick="showClass('PTI03')">
-                        <h3>PTI03</h3>
-                        <p>Lập trình App Producer Intensive</p>
-                        <div class="student-count" id="count-PTI03">0 học viên</div>
-                    </div>
-                    <div class="class-card" onclick="showClass('PTI04')">
-                        <h3>PTI04</h3>
-                        <p>Lập trình App Producer Intensive</p>
-                        <div class="student-count" id="count-PTI04">0 học viên</div>
-                    </div>
-                    <div class="class-card" onclick="showClass('JSB05')">
-                        <h3>JSB05</h3>
-                        <p>Web Basic</p>
-                        <div class="student-count" id="count-JSB05">0 học viên</div>
-                    </div>
+                <div class="actions" style="margin-bottom: 20px;">
+                    <button class="btn" onclick="showAddClassModal()">➕ Thêm lớp học mới</button>
+                    <button class="btn btn-secondary" onclick="showFormatGuide()">📋 Hướng dẫn Excel</button>
                 </div>
+                <h2>Các lớp học đang giảng dạy</h2>
+                <div class="class-grid" id="class-grid"></div>
+            </div>
+
+            <!-- Trang tìm kiếm -->
+            <div id="search-page" class="hidden">
+                <h2>🔍 Tìm kiếm học viên</h2>
+                <div class="search-container">
+                    <div class="search-box">
+                        <input type="text" id="search-input" placeholder="Nhập tên học viên, email hoặc thông tin cần tìm..." oninput="performSearch()">
+                        <span class="search-icon">🔍</span>
+                    </div>
+                    <div class="search-filters">
+                        <div class="filter-item">
+                            <label style="color: #333; font-weight: bold;">Lọc theo lớp:</label>
+                            <select id="search-class-filter" class="filter-select" onchange="performSearch()">
+                                <option value="">Tất cả lớp</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label style="color: #333; font-weight: bold;">Sản phẩm:</label>
+                            <select id="search-product-filter" class="filter-select" onchange="performSearch()">
+                                <option value="">Tất cả</option>
+                                <option value="with-products">Có sản phẩm</option>
+                                <option value="no-products">Chưa có sản phẩm</option>
+                            </select>
+                        </div>
+                        <button class="clear-filters-btn" onclick="clearSearchFilters()">Xóa bộ lọc</button>
+                    </div>
+                    <div class="search-stats" id="search-stats"></div>
+                </div>
+                <div id="search-results" class="student-list"></div>
             </div>
 
             <!-- Trang lớp học -->
@@ -421,6 +573,7 @@
                 <div class="actions">
                     <button class="btn" onclick="showAddStudentForm()">➕ Thêm học viên</button>
                     <button class="btn btn-secondary" onclick="exportClassData()">📊 Xuất dữ liệu lớp</button>
+                    <button class="btn" onclick="showImportModal()">📁 Nhập Excel lớp</button>
                 </div>
                 <h2 id="class-title"></h2>
                 <div id="students-list" class="student-list"></div>
@@ -458,6 +611,29 @@
                 <button class="btn back-btn" onclick="showHome()">← Quay lại</button>
                 <h2>Tất cả học viên</h2>
                 <div id="all-students-list" class="student-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal thêm lớp học -->
+    <div id="add-class-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('add-class-modal')">&times;</span>
+            <h3>Thêm lớp học mới</h3>
+            <div class="form-container">
+                <div class="form-group">
+                    <label for="class-code">Mã lớp:</label>
+                    <input type="text" id="class-code" placeholder="Ví dụ: PTI06, JSB06" required>
+                </div>
+                <div class="form-group">
+                    <label for="class-name">Tên lớp:</label>
+                    <input type="text" id="class-name" placeholder="Ví dụ: Lập trình Python nâng cao" required>
+                </div>
+                <div class="form-group">
+                    <label for="class-description">Mô tả:</label>
+                    <textarea id="class-description" placeholder="Mô tả ngắn về lớp học"></textarea>
+                </div>
+                <button class="btn" onclick="addClass()">Thêm lớp</button>
             </div>
         </div>
     </div>
@@ -524,21 +700,441 @@
         </div>
     </div>
 
+    <!-- Modal nhập Excel -->
+    <div id="import-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('import-modal')">&times;</span>
+            <h3>Nhập dữ liệu từ Excel</h3>
+            <div class="form-container">
+                <div class="form-group">
+                    <label for="excel-file">Chọn file Excel:</label>
+                    <input type="file" id="excel-file" accept=".xlsx,.xls" onchange="handleFileUpload(event)">
+                </div>
+                <div class="form-group">
+                    <label for="import-class">Chọn lớp để nhập:</label>
+                    <select id="import-class"></select>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="overwrite-data"> Ghi đè dữ liệu cũ
+                    </label>
+                    <small style="color: #666; display: block; margin-top: 5px;">
+                        Nếu không chọn, dữ liệu mới sẽ được thêm vào dữ liệu hiện có
+                    </small>
+                </div>
+                <div id="preview-container" style="margin-top: 20px; max-height: 300px; overflow-y: auto;"></div>
+                <button class="btn" onclick="importData()" id="import-btn" disabled>Nhập dữ liệu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal hướng dẫn format Excel -->
+    <div id="format-guide-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('format-guide-modal')">&times;</span>
+            <h3>Hướng dẫn định dạng file Excel</h3>
+            <div style="text-align: left;">
+                <h4>Định dạng cột trong Excel:</h4>
+                <table class="product-table" style="margin: 15px 0;">
+                    <thead>
+                        <tr>
+                            <th>A</th>
+                            <th>B</th>
+                            <th>C</th>
+                            <th>D</th>
+                            <th>E</th>
+                            <th>F</th>
+                            <th>G</th>
+                            <th>H</th>
+                            <th>I</th>
+                            <th>J</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Tên học viên</td>
+                            <td>Email</td>
+                            <td>Số điện thoại</td>
+                            <td>Buổi học</td>
+                            <td>Tên sản phẩm</td>
+                            <td>Ý tưởng</td>
+                            <td>Nhiệm vụ buổi học</td>
+                            <td>Nhiệm vụ về nhà</td>
+                            <td>Tiến độ (%)</td>
+                            <td>Góp ý</td>
+                        </tr>
+                        <tr>
+                            <td>Nguyễn Văn A</td>
+                            <td>email@test.com</td>
+                            <td>0123456789</td>
+                            <td>1</td>
+                            <td>Calculator App</td>
+                            <td>Ứng dụng tính toán</td>
+                            <td>Học Python cơ bản</td>
+                            <td>Hoàn thành giao diện</td>
+                            <td>75</td>
+                            <td>Làm tốt</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="background: #f0f8ff; padding: 15px; border-radius: 10px; margin: 15px 0;">
+                    <h4 style="color: #0066cc; margin-bottom: 10px;">📝 Lưu ý quan trọng:</h4>
+                    <ul style="margin-left: 20px; color: #333;">
+                        <li>Dòng đầu tiên phải là tiêu đề cột (header)</li>
+                        <li>Nếu học viên không có sản phẩm, để trống các cột từ D đến J</li>
+                        <li>Một học viên có thể có nhiều sản phẩm (nhiều dòng)</li>
+                        <li>Tiến độ phải là số từ 0-100</li>
+                        <li>Buổi học phải là số nguyên dương</li>
+                        <li>Hỗ trợ file .xlsx và .xls</li>
+                    </ul>
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="downloadTemplate()">📥 Tải file mẫu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         // Dữ liệu mẫu và biến toàn cục
-        let data = {
-            PTI03: {},
-            PTI04: {},
-            JSB05: {}
-        };
+        let data = {};
+        let classInfo = {};
         let currentClass = '';
         let currentStudent = '';
         let editingProductIndex = -1;
+        let pendingImportData = null;
+        let searchResults = [];
 
         // Khởi tạo ứng dụng
         function init() {
+            initDefaultClasses();
+            initSampleData();
             updateStudentCounts();
+            renderClassGrid();
+            updateImportClassSelect();
+            updateSearchFilters();
+        }
+
+        // Khởi tạo các lớp mặc định
+        function initDefaultClasses() {
+            if (Object.keys(classInfo).length === 0) {
+                classInfo = {
+                    'PTI03': { name: 'Lập trình Python cơ bản', description: 'Khóa học Python cho người mới bắt đầu' },
+                    'PTI04': { name: 'Lập trình Python nâng cao', description: 'Khóa học Python nâng cao' },
+                    'JSB05': { name: 'JavaScript cho người mới bắt đầu', description: 'Khóa học JavaScript cơ bản' }
+                };
+            }
+            
+            // Khởi tạo data cho các lớp nếu chưa có
+            Object.keys(classInfo).forEach(classCode => {
+                if (!data[classCode]) {
+                    data[classCode] = {};
+                }
+            });
+        }
+
+        // Khởi tạo dữ liệu mẫu
+        function initSampleData() {
+            // Thêm một số dữ liệu mẫu để demo
+            data.PTI03['Nguyễn Văn A'] = {
+                email: 'nguyenvana@email.com',
+                phone: '0123456789',
+                products: [
+                    {
+                        session: 1,
+                        name: 'Calculator App',
+                        idea: 'Tạo ứng dụng máy tính đơn giản',
+                        classTask: 'Học syntax Python cơ bản',
+                        homework: 'Hoàn thành phép cộng, trừ',
+                        progress: 75,
+                        feedback: 'Làm tốt, cần cải thiện giao diện'
+                    },
+                    {
+                        session: 2,
+                        name: 'To-Do List',
+                        idea: 'Ứng dụng quản lý công việc',
+                        classTask: 'Học về list và loop',
+                        homework: 'Thêm chức năng xóa task',
+                        progress: 50,
+                        feedback: 'Cần thêm validation'
+                    }
+                ]
+            };
+
+            data.PTI04['Trần Thị B'] = {
+                email: 'tranthib@email.com',
+                phone: '0987654321',
+                products: [
+                    {
+                        session: 1,
+                        name: 'Web Scraper',
+                        idea: 'Thu thập dữ liệu từ website',
+                        classTask: 'Học BeautifulSoup',
+                        homework: 'Scrape một trang tin tức',
+                        progress: 90,
+                        feedback: 'Rất tốt, code sạch và hiệu quả'
+                    }
+                ]
+            };
+
+            data.JSB05['Lê Văn C'] = {
+                email: 'levanc@email.com',
+                phone: '0369852147',
+                products: [
+                    {
+                        session: 1,
+                        name: 'Interactive Website',
+                        idea: 'Trang web tương tác với JavaScript',
+                        classTask: 'Học DOM manipulation',
+                        homework: 'Thêm animation',
+                        progress: 60,
+                        feedback: 'Tốt, cần chú ý responsive design'
+                    }
+                ]
+            };
+
+            // Thêm thêm học viên không có sản phẩm để test
+            data.PTI03['Phạm Thị D'] = {
+                email: 'phamthid@email.com',
+                phone: '0147258369',
+                products: []
+            };
+
+            data.JSB05['Hoàng Văn E'] = {
+                email: 'hoangvane@email.com',
+                phone: '0951753468',
+                products: []
+            };
+        }
+
+        // Cập nhật bộ lọc tìm kiếm
+        function updateSearchFilters() {
+            const classSelect = document.getElementById('search-class-filter');
+            classSelect.innerHTML = '<option value="">Tất cả lớp</option>';
+            
+            Object.keys(classInfo).forEach(classCode => {
+                const option = document.createElement('option');
+                option.value = classCode;
+                option.textContent = `${classCode} - ${classInfo[classCode].name}`;
+                classSelect.appendChild(option);
+            });
+        }
+
+        // Thực hiện tìm kiếm
+        function performSearch() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+            const classFilter = document.getElementById('search-class-filter').value;
+            const productFilter = document.getElementById('search-product-filter').value;
+            
+            searchResults = [];
+            
+            Object.keys(classInfo).forEach(className => {
+                if (classFilter && className !== classFilter) return;
+                
+                if (data[className]) {
+                    Object.keys(data[className]).forEach(studentName => {
+                        const student = data[className][studentName];
+                        const hasProducts = student.products && student.products.length > 0;
+                        
+                        // Áp dụng bộ lọc sản phẩm
+                        if (productFilter === 'with-products' && !hasProducts) return;
+                        if (productFilter === 'no-products' && hasProducts) return;
+                        
+                        // Tìm kiếm trong tên, email, phone và tên sản phẩm
+                        const matchesName = studentName.toLowerCase().includes(searchTerm);
+                        const matchesEmail = student.email && student.email.toLowerCase().includes(searchTerm);
+                        const matchesPhone = student.phone && student.phone.includes(searchTerm);
+                        
+                        let matchesProduct = false;
+                        if (student.products) {
+                            matchesProduct = student.products.some(product => 
+                                product.name.toLowerCase().includes(searchTerm) ||
+                                product.idea.toLowerCase().includes(searchTerm) ||
+                                product.classTask.toLowerCase().includes(searchTerm) ||
+                                product.homework.toLowerCase().includes(searchTerm) ||
+                                product.feedback.toLowerCase().includes(searchTerm)
+                            );
+                        }
+                        
+                        if (!searchTerm || matchesName || matchesEmail || matchesPhone || matchesProduct) {
+                            searchResults.push({
+                                name: studentName,
+                                class: className,
+                                student: student,
+                                matchType: getMatchType(searchTerm, studentName, student)
+                            });
+                        }
+                    });
+                }
+            });
+            
+            displaySearchResults();
+            updateSearchStats();
+        }
+
+        // Xác định loại match để highlight
+        function getMatchType(searchTerm, studentName, student) {
+            if (!searchTerm) return 'all';
+            
+            if (studentName.toLowerCase().includes(searchTerm)) return 'name';
+            if (student.email && student.email.toLowerCase().includes(searchTerm)) return 'email';
+            if (student.phone && student.phone.includes(searchTerm)) return 'phone';
+            
+            if (student.products && student.products.some(p => 
+                p.name.toLowerCase().includes(searchTerm) ||
+                p.idea.toLowerCase().includes(searchTerm) ||
+                p.classTask.toLowerCase().includes(searchTerm) ||
+                p.homework.toLowerCase().includes(searchTerm) ||
+                p.feedback.toLowerCase().includes(searchTerm)
+            )) {
+                return 'product';
+            }
+            
+            return 'none';
+        }
+
+        // Highlight text
+        function highlightText(text, searchTerm) {
+            if (!searchTerm || !text) return text;
+            
+            const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\                        <li>')})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        // Hiển thị kết quả tìm kiếm
+        function displaySearchResults() {
+            const container = document.getElementById('search-results');
+            const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+            
+            if (searchResults.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <i>😔</i>
+                        <p>Không tìm thấy học viên nào phù hợp với từ khóa tìm kiếm</p>
+                        <small>Hãy thử với từ khóa khác hoặc xóa bộ lọc</small>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            searchResults.forEach(result => {
+                const div = document.createElement('div');
+                div.className = 'student-card';
+                div.onclick = () => {
+                    currentClass = result.class;
+                    showStudent(result.name);
+                };
+                
+                const studentName = highlightText(result.name, searchTerm);
+                const studentEmail = highlightText(result.student.email || 'Chưa có email', searchTerm);
+                const studentPhone = highlightText(result.student.phone || 'Chưa có SĐT', searchTerm);
+                
+                let productInfo = '';
+                if (result.matchType === 'product' && searchTerm) {
+                    const matchingProducts = result.student.products.filter(p => 
+                        p.name.toLowerCase().includes(searchTerm) ||
+                        p.idea.toLowerCase().includes(searchTerm) ||
+                        p.classTask.toLowerCase().includes(searchTerm) ||
+                        p.homework.toLowerCase().includes(searchTerm) ||
+                        p.feedback.toLowerCase().includes(searchTerm)
+                    );
+                    
+                    if (matchingProducts.length > 0) {
+                        const productNames = matchingProducts.map(p => highlightText(p.name, searchTerm)).join(', ');
+                        productInfo = `<p style="font-size: 0.9em; color: #666; margin-top: 5px;">📋 Sản phẩm: ${productNames}</p>`;
+                    }
+                }
+                
+                div.innerHTML = `
+                    <div class="student-class-badge">${result.class}</div>
+                    <h4>${studentName}</h4>
+                    <p>${studentEmail}</p>
+                    <p>${studentPhone}</p>
+                    ${productInfo}
+                    <div class="product-count">${result.student.products.length} sản phẩm</div>
+                    <button class="btn btn-danger" style="margin-top: 10px; font-size: 12px; padding: 5px 10px;" onclick="event.stopPropagation(); deleteStudentFromSearch('${result.class}', '${result.name}')">Xóa</button>
+                `;
+                
+                container.appendChild(div);
+            });
+        }
+
+        // Cập nhật thống kê tìm kiếm
+        function updateSearchStats() {
+            const stats = document.getElementById('search-stats');
+            const searchTerm = document.getElementById('search-input').value.trim();
+            const classFilter = document.getElementById('search-class-filter').value;
+            const productFilter = document.getElementById('search-product-filter').value;
+            
+            let statsText = `Tìm thấy ${searchResults.length} học viên`;
+            
+            if (searchTerm) {
+                statsText += ` với từ khóa "${searchTerm}"`;
+            }
+            
+            if (classFilter) {
+                statsText += ` trong lớp ${classFilter}`;
+            }
+            
+            if (productFilter === 'with-products') {
+                statsText += ` có sản phẩm`;
+            } else if (productFilter === 'no-products') {
+                statsText += ` chưa có sản phẩm`;
+            }
+            
+            stats.textContent = statsText;
+        }
+
+        // Xóa bộ lọc tìm kiếm
+        function clearSearchFilters() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('search-class-filter').value = '';
+            document.getElementById('search-product-filter').value = '';
+            performSearch();
+        }
+
+        // Xóa học viên từ trang tìm kiếm
+        function deleteStudentFromSearch(className, studentName) {
+            if (confirm(`Bạn có chắc muốn xóa học viên ${studentName} khỏi lớp ${className}?`)) {
+                delete data[className][studentName];
+                updateStudentCounts();
+                performSearch(); // Cập nhật lại kết quả tìm kiếm
+            }
+        }
+
+        // Hiển thị trang tìm kiếm
+        function showSearchPage() {
+            hideAllPages();
+            document.getElementById('search-page').classList.remove('hidden');
+            setActiveNav(2);
+            updateSearchFilters();
+            performSearch(); // Hiển thị tất cả học viên ban đầu
+        }
+
+        // Render lại grid các lớp học
+        function renderClassGrid() {
+            const grid = document.getElementById('class-grid');
+            grid.innerHTML = '';
+            
+            Object.keys(classInfo).forEach(classCode => {
+                const classData = classInfo[classCode];
+                const div = document.createElement('div');
+                div.className = 'class-card';
+                div.onclick = () => showClass(classCode);
+                
+                div.innerHTML = `
+                    <h3>${classCode}</h3>
+                    <p>${classData.name}</p>
+                    <small style="color: #666;">${classData.description}</small>
+                    <div class="student-count" id="count-${classCode}">0 học viên</div>
+                    <button class="btn btn-danger" style="margin-top: 10px; font-size: 12px; padding: 5px 10px;" onclick="event.stopPropagation(); deleteClass('${classCode}')">Xóa lớp</button>
+                `;
+                
+                grid.appendChild(div);
+            });
         }
 
         // Hiển thị trang chủ
@@ -547,6 +1143,7 @@
             document.getElementById('home-page').classList.remove('hidden');
             setActiveNav(0);
             updateStudentCounts();
+            renderClassGrid();
         }
 
         // Hiển thị trang lớp học
@@ -554,7 +1151,7 @@
             currentClass = className;
             hideAllPages();
             document.getElementById('class-page').classList.remove('hidden');
-            document.getElementById('class-title').textContent = `Lớp ${className}`;
+            document.getElementById('class-title').textContent = `Lớp ${className} - ${classInfo[className].name}`;
             displayStudents();
         }
 
@@ -577,7 +1174,7 @@
 
         // Ẩn tất cả trang
         function hideAllPages() {
-            const pages = ['home-page', 'class-page', 'student-page', 'all-students-page'];
+            const pages = ['home-page', 'class-page', 'student-page', 'all-students-page', 'search-page'];
             pages.forEach(page => {
                 document.getElementById(page).classList.add('hidden');
             });
@@ -595,6 +1192,72 @@
             });
         }
 
+        // Thêm lớp học mới
+        function showAddClassModal() {
+            document.getElementById('add-class-modal').style.display = 'block';
+            clearClassForm();
+        }
+
+        function clearClassForm() {
+            document.getElementById('class-code').value = '';
+            document.getElementById('class-name').value = '';
+            document.getElementById('class-description').value = '';
+        }
+
+        function addClass() {
+            const code = document.getElementById('class-code').value.trim().toUpperCase();
+            const name = document.getElementById('class-name').value.trim();
+            const description = document.getElementById('class-description').value.trim();
+
+            if (!code || !name) {
+                alert('Vui lòng nhập mã lớp và tên lớp!');
+                return;
+            }
+
+            if (classInfo[code]) {
+                alert('Mã lớp đã tồn tại!');
+                return;
+            }
+
+            classInfo[code] = {
+                name: name,
+                description: description
+            };
+
+            data[code] = {};
+
+            closeModal('add-class-modal');
+            renderClassGrid();
+            updateStudentCounts();
+            updateImportClassSelect();
+            updateSearchFilters();
+        }
+
+        // Xóa lớp học
+        function deleteClass(classCode) {
+            if (confirm(`Bạn có chắc muốn xóa lớp ${classCode}? Tất cả dữ liệu học viên sẽ bị mất!`)) {
+                delete classInfo[classCode];
+                delete data[classCode];
+                renderClassGrid();
+                updateStudentCounts();
+                updateImportClassSelect();
+                updateSearchFilters();
+            }
+        }
+
+        // Cập nhật danh sách lớp trong select import
+        function updateImportClassSelect() {
+            const select = document.getElementById('import-class');
+            select.innerHTML = '';
+            
+            Object.keys(classInfo).forEach(classCode => {
+                const option = document.createElement('option');
+                option.value = classCode;
+                option.textContent = `${classCode} - ${classInfo[classCode].name}`;
+                select.appendChild(option);
+            });
+        }
+
         // Quay lại trang lớp
         function goBackToClass() {
             showClass(currentClass);
@@ -602,9 +1265,12 @@
 
         // Cập nhật số lượng học viên
         function updateStudentCounts() {
-            Object.keys(data).forEach(className => {
-                const count = Object.keys(data[className]).length;
-                document.getElementById(`count-${className}`).textContent = `${count} học viên`;
+            Object.keys(classInfo).forEach(className => {
+                const count = data[className] ? Object.keys(data[className]).length : 0;
+                const countElement = document.getElementById(`count-${className}`);
+                if (countElement) {
+                    countElement.textContent = `${count} học viên`;
+                }
             });
         }
 
@@ -661,8 +1327,8 @@
 
                 div.innerHTML = `
                     <h4>${studentName}</h4>
-                    <p>${student.email}</p>
-                    <p>${student.phone}</p>
+                    <p>${student.email || 'Chưa có email'}</p>
+                    <p>${student.phone || 'Chưa có SĐT'}</p>
                     <div class="product-count">${student.products.length} sản phẩm</div>
                     <button class="btn btn-danger" style="margin-top: 10px; font-size: 12px; padding: 5px 10px;" onclick="event.stopPropagation(); deleteStudent('${studentName}')">Xóa</button>
                 `;
@@ -676,25 +1342,27 @@
             const container = document.getElementById('all-students-list');
             container.innerHTML = '';
 
-            Object.keys(data).forEach(className => {
-                Object.keys(data[className]).forEach(studentName => {
-                    const student = data[className][studentName];
-                    const div = document.createElement('div');
-                    div.className = 'student-card';
-                    div.onclick = () => {
-                        currentClass = className;
-                        showStudent(studentName);
-                    };
+            Object.keys(classInfo).forEach(className => {
+                if (data[className]) {
+                    Object.keys(data[className]).forEach(studentName => {
+                        const student = data[className][studentName];
+                        const div = document.createElement('div');
+                        div.className = 'student-card';
+                        div.onclick = () => {
+                            currentClass = className;
+                            showStudent(studentName);
+                        };
 
-                    div.innerHTML = `
-                        <h4>${studentName}</h4>
-                        <p>Lớp: ${className}</p>
-                        <p>${student.email}</p>
-                        <div class="product-count">${student.products.length} sản phẩm</div>
-                    `;
+                        div.innerHTML = `
+                            <div class="student-class-badge">${className}</div>
+                            <h4>${studentName}</h4>
+                            <p>${student.email || 'Chưa có email'}</p>
+                            <div class="product-count">${student.products.length} sản phẩm</div>
+                        `;
 
-                    container.appendChild(div);
-                });
+                        container.appendChild(div);
+                    });
+                }
             });
         }
 
@@ -781,6 +1449,8 @@
             tbody.innerHTML = '';
 
             const products = data[currentClass][currentStudent].products;
+            products.sort((a, b) => a.session - b.session); // Sắp xếp theo buổi học
+            
             products.forEach((product, index) => {
                 const row = tbody.insertRow();
                 row.innerHTML = `
@@ -818,38 +1488,266 @@
             document.getElementById(modalId).style.display = 'none';
         }
 
+        // Hiển thị modal import
+        function showImportModal() {
+            document.getElementById('import-modal').style.display = 'block';
+            updateImportClassSelect();
+            document.getElementById('excel-file').value = '';
+            document.getElementById('preview-container').innerHTML = '';
+            document.getElementById('import-btn').disabled = true;
+            pendingImportData = null;
+        }
+
+        // Hiển thị hướng dẫn format Excel
+        function showFormatGuide() {
+            document.getElementById('format-guide-modal').style.display = 'block';
+        }
+
+        // Tải file mẫu Excel
+        function downloadTemplate() {
+            const templateData = [
+                ['Tên học viên', 'Email', 'Số điện thoại', 'Buổi học', 'Tên sản phẩm', 'Ý tưởng', 'Nhiệm vụ buổi học', 'Nhiệm vụ về nhà', 'Tiến độ (%)', 'Góp ý'],
+                ['Nguyễn Văn A', 'nguyenvana@email.com', '0123456789', '1', 'Calculator App', 'Ứng dụng máy tính đơn giản', 'Học syntax Python cơ bản', 'Hoàn thành phép cộng, trừ', '75', 'Làm tốt, cần cải thiện giao diện'],
+                ['Nguyễn Văn A', 'nguyenvana@email.com', '0123456789', '2', 'To-Do List', 'Ứng dụng quản lý công việc', 'Học về list và loop', 'Thêm chức năng xóa task', '50', 'Cần thêm validation'],
+                ['Trần Thị B', 'tranthib@email.com', '0987654321', '', '', '', '', '', '', ''],
+                ['Lê Văn C', 'levanc@email.com', '0369852147', '1', 'Interactive Website', 'Trang web tương tác với JavaScript', 'Học DOM manipulation', 'Thêm animation', '60', 'Tốt, cần chú ý responsive design']
+            ];
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(templateData);
+            XLSX.utils.book_append_sheet(wb, ws, 'Template');
+            XLSX.writeFile(wb, 'Template_Import_Students.xlsx');
+        }
+
+        // Xử lý upload file Excel
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                    if (jsonData.length < 2) {
+                        alert('File Excel phải có ít nhất 2 dòng (header và dữ liệu)');
+                        return;
+                    }
+
+                    // Parse dữ liệu
+                    const parsedData = parseExcelData(jsonData);
+                    if (parsedData && parsedData.length > 0) {
+                        pendingImportData = parsedData;
+                        showPreview(parsedData);
+                        document.getElementById('import-btn').disabled = false;
+                    } else {
+                        alert('Không thể đọc dữ liệu từ file Excel');
+                    }
+
+                } catch (error) {
+                    alert('Lỗi khi đọc file Excel: ' + error.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Parse dữ liệu Excel
+        function parseExcelData(jsonData) {
+            const students = {};
+            
+            for (let i = 1; i < jsonData.length; i++) {
+                const row = jsonData[i];
+                
+                // Bỏ qua dòng trống
+                if (!row[0] || row[0].toString().trim() === '') continue;
+                
+                const studentName = row[0].toString().trim();
+                const email = row[1] ? row[1].toString().trim() : '';
+                const phone = row[2] ? row[2].toString().trim() : '';
+                
+                // Khởi tạo học viên nếu chưa có
+                if (!students[studentName]) {
+                    students[studentName] = {
+                        email: email,
+                        phone: phone,
+                        products: []
+                    };
+                }
+                
+                // Thêm sản phẩm nếu có dữ liệu
+                if (row[3] && row[4]) { // Có buổi học và tên sản phẩm
+                    const session = parseInt(row[3]);
+                    if (isNaN(session) || session < 1) {
+                        console.warn(`Buổi học không hợp lệ cho ${studentName}: ${row[3]}`);
+                        continue;
+                    }
+                    
+                    let progress = 0;
+                    if (row[8]) {
+                        progress = parseInt(row[8]);
+                        if (isNaN(progress) || progress < 0 || progress > 100) {
+                            progress = 0;
+                        }
+                    }
+                    
+                    const product = {
+                        session: session,
+                        name: row[4] ? row[4].toString().trim() : '',
+                        idea: row[5] ? row[5].toString().trim() : '',
+                        classTask: row[6] ? row[6].toString().trim() : '',
+                        homework: row[7] ? row[7].toString().trim() : '',
+                        progress: progress,
+                        feedback: row[9] ? row[9].toString().trim() : ''
+                    };
+                    
+                    students[studentName].products.push(product);
+                }
+            }
+            
+            return Object.keys(students).map(name => ({
+                name: name,
+                ...students[name]
+            }));
+        }
+
+        // Hiển thị preview dữ liệu
+        function showPreview(studentsData) {
+            const container = document.getElementById('preview-container');
+            
+            let html = `
+                <h4>Preview dữ liệu (${studentsData.length} học viên):</h4>
+                <div style="max-height: 250px; overflow-y: auto; border: 1px solid #ddd; border-radius: 5px;">
+                    <table class="product-table" style="margin: 0;">
+                        <thead>
+                            <tr>
+                                <th>Tên học viên</th>
+                                <th>Email</th>
+                                <th>SĐT</th>
+                                <th>Số sản phẩm</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            studentsData.forEach(student => {
+                html += `
+                    <tr>
+                        <td>${student.name}</td>
+                        <td>${student.email}</td>
+                        <td>${student.phone}</td>
+                        <td>${student.products.length}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        // Import dữ liệu vào hệ thống
+        function importData() {
+            if (!pendingImportData) {
+                alert('Không có dữ liệu để import');
+                return;
+            }
+
+            const selectedClass = document.getElementById('import-class').value;
+            const overwrite = document.getElementById('overwrite-data').checked;
+
+            if (!selectedClass) {
+                alert('Vui lòng chọn lớp để import');
+                return;
+            }
+
+            // Xóa dữ liệu cũ nếu chọn ghi đè
+            if (overwrite) {
+                data[selectedClass] = {};
+            }
+
+            let importedCount = 0;
+            let updatedCount = 0;
+
+            pendingImportData.forEach(studentData => {
+                if (data[selectedClass][studentData.name]) {
+                    // Học viên đã tồn tại
+                    if (overwrite) {
+                        data[selectedClass][studentData.name] = {
+                            email: studentData.email,
+                            phone: studentData.phone,
+                            products: studentData.products
+                        };
+                        updatedCount++;
+                    } else {
+                        // Merge sản phẩm mới
+                        const existingProducts = data[selectedClass][studentData.name].products;
+                        studentData.products.forEach(newProduct => {
+                            // Kiểm tra xem sản phẩm đã tồn tại chưa (cùng session và tên)
+                            const existingProduct = existingProducts.find(p => 
+                                p.session === newProduct.session && p.name === newProduct.name
+                            );
+                            
+                            if (!existingProduct) {
+                                existingProducts.push(newProduct);
+                            }
+                        });
+                        updatedCount++;
+                    }
+                } else {
+                    // Học viên mới
+                    data[selectedClass][studentData.name] = {
+                        email: studentData.email,
+                        phone: studentData.phone,
+                        products: studentData.products
+                    };
+                    importedCount++;
+                }
+            });
+
+            closeModal('import-modal');
+            updateStudentCounts();
+            renderClassGrid();
+
+            alert(`Import thành công!\n- ${importedCount} học viên mới\n- ${updatedCount} học viên được cập nhật`);
+        }
+
         // Xuất dữ liệu Excel - Tất cả
         function exportData() {
             const wb = XLSX.utils.book_new();
             
-            Object.keys(data).forEach(className => {
-                const worksheetData = [];
-                worksheetData.push(['Tên học viên', 'Email', 'Số điện thoại', 'Buổi học', 'Tên sản phẩm', 'Ý tưởng', 'Nhiệm vụ buổi học', 'Nhiệm vụ về nhà', 'Tiến độ (%)', 'Góp ý']);
-                
-                Object.keys(data[className]).forEach(studentName => {
-                    const student = data[className][studentName];
-                    if (student.products.length === 0) {
-                        worksheetData.push([studentName, student.email, student.phone, '', '', '', '', '', '', '']);
-                    } else {
-                        student.products.forEach(product => {
-                            worksheetData.push([
-                                studentName,
-                                student.email,
-                                student.phone,
-                                `Buổi ${product.session}`,
-                                product.name,
-                                product.idea,
-                                product.classTask,
-                                product.homework,
-                                product.progress,
-                                product.feedback
-                            ]);
-                        });
-                    }
-                });
-                
-                const ws = XLSX.utils.aoa_to_sheet(worksheetData);
-                XLSX.utils.book_append_sheet(wb, ws, className);
+            Object.keys(classInfo).forEach(className => {
+                if (data[className]) {
+                    const worksheetData = [];
+                    worksheetData.push(['Tên học viên', 'Email', 'Số điện thoại', 'Buổi học', 'Tên sản phẩm', 'Ý tưởng', 'Nhiệm vụ buổi học', 'Nhiệm vụ về nhà', 'Tiến độ (%)', 'Góp ý']);
+                    
+                    Object.keys(data[className]).forEach(studentName => {
+                        const student = data[className][studentName];
+                        if (student.products.length === 0) {
+                            worksheetData.push([studentName, student.email, student.phone, '', '', '', '', '', '', '']);
+                        } else {
+                            student.products.forEach(product => {
+                                worksheetData.push([
+                                    studentName,
+                                    student.email,
+                                    student.phone,
+                                    product.session,
+                                    product.name,
+                                    product.idea,
+                                    product.classTask,
+                                    product.homework,
+                                    product.progress,
+                                    product.feedback
+                                ]);
+                            });
+                        }
+                    });
+                    
+                    const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+                    XLSX.utils.book_append_sheet(wb, ws, className);
+                }
             });
             
             XLSX.writeFile(wb, `Danh_sach_hoc_vien_${new Date().toISOString().split('T')[0]}.xlsx`);
@@ -870,7 +1768,7 @@
                             studentName,
                             student.email,
                             student.phone,
-                            `Buổi ${product.session}`,
+                            product.session,
                             product.name,
                             product.idea,
                             product.classTask,
@@ -897,7 +1795,7 @@
             const student = data[currentClass][currentStudent];
             student.products.forEach(product => {
                 worksheetData.push([
-                    `Buổi ${product.session}`,
+                    product.session,
                     product.name,
                     product.idea,
                     product.classTask,
@@ -914,67 +1812,6 @@
             XLSX.writeFile(wb, `${currentStudent}_${currentClass}_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
 
-        // Khởi tạo dữ liệu mẫu
-        function initSampleData() {
-            // Thêm một số dữ liệu mẫu để demo
-            data.PTI03['Nguyễn Văn A'] = {
-                email: 'nguyenvana@email.com',
-                phone: '0123456789',
-                products: [
-                    {
-                        session: 1,
-                        name: 'Calculator App',
-                        idea: 'Tạo ứng dụng máy tính đơn giản',
-                        classTask: 'Học syntax Python cơ bản',
-                        homework: 'Hoàn thành phép cộng, trừ',
-                        progress: 75,
-                        feedback: 'Làm tốt, cần cải thiện giao diện'
-                    },
-                    {
-                        session: 2,
-                        name: 'To-Do List',
-                        idea: 'Ứng dụng quản lý công việc',
-                        classTask: 'Học về list và loop',
-                        homework: 'Thêm chức năng xóa task',
-                        progress: 50,
-                        feedback: 'Cần thêm validation'
-                    }
-                ]
-            };
-
-            data.PTI04['Trần Thị B'] = {
-                email: 'tranthib@email.com',
-                phone: '0987654321',
-                products: [
-                    {
-                        session: 1,
-                        name: 'Web Scraper',
-                        idea: 'Thu thập dữ liệu từ website',
-                        classTask: 'Học BeautifulSoup',
-                        homework: 'Scrape một trang tin tức',
-                        progress: 90,
-                        feedback: 'Rất tốt, code sạch và hiệu quả'
-                    }
-                ]
-            };
-
-            data.JSB05['Lê Văn C'] = {
-                email: 'levanc@email.com',
-                phone: '0369852147',
-                products: [
-                    {
-                        session: 1,
-                        name: 'Interactive Website',
-                        idea: 'Trang web tương tác với JavaScript',
-                        classTask: 'Học DOM manipulation',
-                        homework: 'Thêm animation',
-                        progress: 60,
-                        feedback: 'Tốt, cần chú ý responsive design'
-                    }
-                ]
-            };
-        }
-
         // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
             // Đóng modal khi click outside
@@ -987,8 +1824,7 @@
                 });
             };
 
-            // Khởi tạo dữ liệu mẫu và ứng dụng
-            initSampleData();
+            // Khởi tạo ứng dụng
             init();
         });
 
@@ -1004,77 +1840,48 @@
                 });
             }
             
+            // Ctrl + F để focus vào ô tìm kiếm
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                const searchInput = document.getElementById('search-input');
+                if (!document.getElementById('search-page').classList.contains('hidden')) {
+                    searchInput.focus();
+                } else {
+                    showSearchPage();
+                    setTimeout(() => searchInput.focus(), 100);
+                }
+            }
+            
             // Ctrl + S để lưu khi đang trong form
             if (e.ctrlKey && e.key === 's') {
                 e.preventDefault();
                 const productModal = document.getElementById('add-product-modal');
                 const studentModal = document.getElementById('add-student-modal');
+                const classModal = document.getElementById('add-class-modal');
                 
                 if (productModal.style.display === 'block') {
                     saveProduct();
                 } else if (studentModal.style.display === 'block') {
                     addStudent();
+                } else if (classModal.style.display === 'block') {
+                    addClass();
                 }
             }
         });
 
-        // Tự động lưu progress khi thay đổi
-        function updateProgress(studentName, productIndex, newProgress) {
-            data[currentClass][studentName].products[productIndex].progress = newProgress;
-            displayProducts();
-        }
-
-        // Search functionality
-        function searchStudents(query) {
-            const searchResults = [];
-            Object.keys(data).forEach(className => {
-                Object.keys(data[className]).forEach(studentName => {
-                    if (studentName.toLowerCase().includes(query.toLowerCase()) ||
-                        data[className][studentName].email.toLowerCase().includes(query.toLowerCase())) {
-                        searchResults.push({
-                            name: studentName,
-                            class: className,
-                            student: data[className][studentName]
-                        });
-                    }
-                });
-            });
-            return searchResults;
-        }
-
-        // Thống kê
-        function getStatistics() {
-            const stats = {
-                totalStudents: 0,
-                totalProducts: 0,
-                averageProgress: 0,
-                classCounts: {}
-            };
-
-            let totalProgress = 0;
-            let productCount = 0;
-
-            Object.keys(data).forEach(className => {
-                const studentCount = Object.keys(data[className]).length;
-                stats.totalStudents += studentCount;
-                stats.classCounts[className] = studentCount;
-
-                Object.keys(data[className]).forEach(studentName => {
-                    const student = data[className][studentName];
-                    stats.totalProducts += student.products.length;
-                    
-                    student.products.forEach(product => {
-                        totalProgress += product.progress;
-                        productCount++;
-                    });
-                });
-            });
-
-            if (productCount > 0) {
-                stats.averageProgress = Math.round(totalProgress / productCount);
+        // Auto-save search to localStorage for persistence (if available)
+        if (typeof Storage !== 'undefined') {
+            // Lưu tìm kiếm gần đây
+            function saveRecentSearch(searchTerm) {
+                if (!searchTerm.trim()) return;
+                
+                let recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+                recentSearches = recentSearches.filter(term => term !== searchTerm);
+                recentSearches.unshift(searchTerm);
+                recentSearches = recentSearches.slice(0, 5); // Giữ 5 tìm kiếm gần đây
+                
+                localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
             }
-
-            return stats;
         }
     </script>
 </body>
