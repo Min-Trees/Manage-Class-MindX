@@ -18,6 +18,10 @@
             min-height: 100vh;
         }
 
+        p, h4, small, td, th {
+            word-break: break-word;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -172,11 +176,16 @@
             margin-top: 10px;
         }
 
-        .class-grid {
+        .class-grid-section {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 25px;
             margin-top: 20px;
+        }
+
+        .class-section-title {
+            margin-top: 30px;
+            color: #333;
         }
 
         .class-card {
@@ -342,6 +351,11 @@
             font-size: 1.2em;
         }
 
+        .student-card p {
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
         .student-class-badge {
             background: rgba(102, 126, 234, 0.1);
             color: #667eea;
@@ -396,6 +410,8 @@
             padding: 15px;
             text-align: left;
             border-bottom: 1px solid #e0e0e0;
+            white-space: normal;
+            word-break: break-word;
         }
 
         .product-table th {
@@ -503,12 +519,21 @@
             background: rgba(244, 67, 54, 0.9);
         }
 
+        .comment-box {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
             }
 
-            .class-grid {
+            .class-grid-section {
                 grid-template-columns: 1fr;
             }
 
@@ -539,6 +564,7 @@
             }
         }
     </style>
+    <script src="https://apis.google.com/js/api.js"></script>
 </head>
 
 <body>
@@ -564,7 +590,7 @@
                     <button class="btn btn-danger" onclick="clearAllData()">🗑️ Xóa tất cả dữ liệu</button>
                 </div>
                 <h2>Các lớp học đang giảng dạy</h2>
-                <div class="class-grid" id="class-grid"></div>
+                <div id="class-grid"></div>
             </div>
 
             <!-- Trang tìm kiếm -->
@@ -607,6 +633,11 @@
                     <button class="btn" onclick="showImportModal()">📁 Nhập Excel lớp</button>
                 </div>
                 <h2 id="class-title"></h2>
+                <div id="class-comment-section">
+                    <h3>Nhận xét lớp</h3>
+                    <textarea id="class-comment" class="comment-box"></textarea>
+                    <button class="btn" onclick="saveClassComment()">Lưu nhận xét</button>
+                </div>
                 <div id="students-list" class="student-list"></div>
             </div>
 
@@ -659,6 +690,13 @@
                 <div class="form-group">
                     <label for="class-name">Tên lớp:</label>
                     <input type="text" id="class-name" placeholder="Ví dụ: Lập trình Python nâng cao" required>
+                </div>
+                <div class="form-group">
+                    <label for="class-type">Loại lớp:</label>
+                    <select id="class-type">
+                        <option value="coding">Coding</option>
+                        <option value="robotic">Robotic</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="class-description">Mô tả:</label>
@@ -728,6 +766,15 @@
                 </div>
                 <button class="btn" onclick="saveProduct()" id="save-product-btn">Thêm sản phẩm</button>
             </div>
+        </div>
+    </div>
+    
+    <!-- Modal xem chi tiết -->
+    <div id="detail-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('detail-modal')">&times;</span>
+            <h3>Chi tiết nội dung</h3>
+            <div id="detail-content" style="white-space: pre-wrap;"></div>
         </div>
     </div>
 
@@ -851,6 +898,13 @@
             RECENT_SEARCHES: 'student_management_recent_searches'
         };
 
+        // Cấu hình Google Sheets (cần thay bằng thông tin thật)
+        const GOOGLE_SHEET_CONFIG = {
+            apiKey: 'YOUR_API_KEY',
+            clientId: 'YOUR_CLIENT_ID',
+            spreadsheetId: 'YOUR_SPREADSHEET_ID'
+        };
+
         // Lưu dữ liệu vào localStorage
         function saveToLocalStorage() {
             try {
@@ -858,6 +912,7 @@
                 localStorage.setItem(STORAGE_KEYS.CLASS_INFO, JSON.stringify(classInfo));
                 showStorageStatus('💾 Đã lưu', false);
                 console.log('Dữ liệu đã được lưu vào localStorage');
+                saveToGoogleSheet();
             } catch (error) {
                 console.error('Lỗi khi lưu vào localStorage:', error);
                 showStorageStatus('❌ Lỗi lưu trữ', true);
@@ -907,6 +962,32 @@
             setTimeout(() => {
                 statusElement.classList.remove('show');
             }, 2000);
+        }
+
+        // ======================== GOOGLE SHEETS FUNCTIONS ========================
+        function initGoogleSheets() {
+            if (typeof gapi === 'undefined') {
+                console.warn('Google API not loaded');
+                return;
+            }
+            gapi.load('client:auth2', () => {
+                gapi.client.init({
+                    apiKey: GOOGLE_SHEET_CONFIG.apiKey,
+                    clientId: GOOGLE_SHEET_CONFIG.clientId,
+                    discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
+                    scope: "https://www.googleapis.com/auth/spreadsheets"
+                }).then(loadFromGoogleSheet);
+            });
+        }
+
+        function loadFromGoogleSheet() {
+            // TODO: Tải dữ liệu từ Google Sheets và cập nhật vào ứng dụng
+            console.log('Loading data from Google Sheets...');
+        }
+
+        function saveToGoogleSheet() {
+            // TODO: Đồng bộ dữ liệu ứng dụng lên Google Sheets
+            console.log('Saving data to Google Sheets...');
         }
 
         // Xóa tất cả dữ liệu
@@ -971,15 +1052,17 @@
             updateImportClassSelect();
             updateSearchFilters();
 
+            initGoogleSheets();
             console.log('Ứng dụng đã được khởi tạo');
         }
 
         // Khởi tạo các lớp mặc định
         function initDefaultClasses() {
             classInfo = {
-                'PTI03': { name: 'Lập trình Python cơ bản', description: 'Khóa học Python cho người mới bắt đầu' },
-                'PTI04': { name: 'Lập trình Python nâng cao', description: 'Khóa học Python nâng cao' },
-                'JSB05': { name: 'JavaScript cho người mới bắt đầu', description: 'Khóa học JavaScript cơ bản' }
+                'PTI03': { name: 'Lập trình Python cơ bản', description: 'Khóa học Python cho người mới bắt đầu', type: 'coding', comment: '' },
+                'PTI04': { name: 'Lập trình Python nâng cao', description: 'Khóa học Python nâng cao', type: 'coding', comment: '' },
+                'JSB05': { name: 'JavaScript cho người mới bắt đầu', description: 'Khóa học JavaScript cơ bản', type: 'coding', comment: '' },
+                'RBT01': { name: 'Robotics cơ bản', description: 'Khóa học Robotics cơ bản', type: 'robotic', comment: '' }
             };
 
             // Khởi tạo data cho các lớp nếu chưa có
@@ -1294,8 +1377,28 @@
             const grid = document.getElementById('class-grid');
             grid.innerHTML = '';
 
+            const sections = {
+                robotic: { title: 'Robotic', element: null },
+                coding: { title: 'Coding', element: null }
+            };
+
+            Object.keys(sections).forEach(key => {
+                const title = document.createElement('h3');
+                title.textContent = sections[key].title;
+                title.className = 'class-section-title';
+                grid.appendChild(title);
+
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'class-grid-section';
+                sectionDiv.id = `${key}-section`;
+                grid.appendChild(sectionDiv);
+                sections[key].element = sectionDiv;
+            });
+
             Object.keys(classInfo).forEach(classCode => {
                 const classData = classInfo[classCode];
+                const type = classData.type || 'coding';
+                const section = sections[type].element;
                 const div = document.createElement('div');
                 div.className = 'class-card';
                 div.onclick = () => showClass(classCode);
@@ -1303,11 +1406,11 @@
                 div.innerHTML = `
                     <h3>${classCode}</h3>
                     <p>${classData.name}</p>
-                    <small style="color: #666;">${classData.description}</small>
+                    <small style="color: #666;">${classData.description || ''}</small>
                     <button class="btn btn-danger" style="margin-top: 10px; font-size: 12px; padding: 5px 10px;" onclick="event.stopPropagation(); deleteClass('${classCode}')">Xóa lớp</button>
                 `;
 
-                grid.appendChild(div);
+                section.appendChild(div);
             });
         }
 
@@ -1326,6 +1429,7 @@
             hideAllPages();
             document.getElementById('class-page').classList.remove('hidden');
             document.getElementById('class-title').textContent = `Lớp ${className} - ${classInfo[className].name}`;
+            document.getElementById('class-comment').value = classInfo[className].comment || '';
             displayStudents();
         }
 
@@ -1377,6 +1481,7 @@
         function clearClassForm() {
             document.getElementById('class-code').value = '';
             document.getElementById('class-name').value = '';
+            document.getElementById('class-type').value = 'coding';
             document.getElementById('class-description').value = '';
         }
 
@@ -1384,6 +1489,7 @@
             const code = document.getElementById('class-code').value.trim().toUpperCase();
             const name = document.getElementById('class-name').value.trim();
             const description = document.getElementById('class-description').value.trim();
+            const type = document.getElementById('class-type').value;
 
             if (!code || !name) {
                 alert('Vui lòng nhập mã lớp và tên lớp!');
@@ -1397,7 +1503,9 @@
 
             classInfo[code] = {
                 name: name,
-                description: description
+                description: description,
+                type: type,
+                comment: ''
             };
 
             data[code] = {};
@@ -1424,6 +1532,12 @@
                 updateImportClassSelect();
                 updateSearchFilters();
             }
+        }
+
+        function saveClassComment() {
+            if (!classInfo[currentClass]) return;
+            classInfo[currentClass].comment = document.getElementById('class-comment').value.trim();
+            saveToLocalStorage();
         }
 
         // ======================== STUDENT MANAGEMENT ========================
@@ -1563,12 +1677,21 @@
 
         // ======================== PRODUCT MANAGEMENT ========================
 
+        function getFeedbackTemplate() {
+            const type = classInfo[currentClass]?.type;
+            if (type === 'robotic') {
+                return `Khả năng lắp ráp: Con lắp ráp tốt, tuân thủ đúng các bước và đảm bảo sản phẩm vận hành ổn định.\nLập trình: Con lập trình đúng theo yêu cầu, ít mắc lỗi và biết điều chỉnh khi robot chưa hoạt động như mong muốn.\nThái độ học tập: Con tập trung, nghiêm túc và hoàn thành tốt nội dung buổi học.\nLàm việc nhóm: Con làm việc nhóm tốt, hỗ trợ và phối hợp với các bạn để đạt kết quả chung.`;
+            }
+            return `Khả năng học tập: Trong buổi học hôm nay con tập trung khá tốt, tương tác tốt với thầy để xây dựng bài giảng, trong quá trình học con nên chủ động hơn khi chưa hiểu hoặc gặp sai sót. Con tiếp thu được kiến thức trong buổi học.\nKhả năng lập trình: Con lập trình được cú pháp cơ bản của List, trong quá trình lập trình con cần kiểm tra kĩ hơn để tránh bị sai lỗi cú pháp ( chính tả), trong quá trình làm bài tập con cần phân tích kĩ hơn, con hoàn thành nội dung buổi học.\nKhả năng ứng dung: Con ứng dụng được các bài tập cơ bản, đối với kiến thức mới còn còn gặp một số sai sót nhỏ và cần thầy hỗ trợ, về nhà con cố gắng ôn tập và làm bài tập để vững kiến thức hơn nhé.\nBài tập về nhà: Con hoàn thành đầy đủ bài tập về nhà`;
+        }
+
         // Hiển thị form thêm sản phẩm
         function showAddProductForm() {
             editingProductIndex = -1;
             document.getElementById('product-modal-title').textContent = 'Thêm sản phẩm mới';
             document.getElementById('save-product-btn').textContent = 'Thêm sản phẩm';
             clearProductForm();
+            document.getElementById('product-feedback').value = getFeedbackTemplate();
             document.getElementById('add-product-modal').style.display = 'block';
         }
 
@@ -1633,6 +1756,33 @@
             displayProducts();
         }
 
+        // Rút gọn nội dung dài và tạo liên kết xem thêm
+        function renderTruncated(text) {
+            if (!text) return '';
+            const limit = 50;
+            const normalized = text.replace(/\n/g, ' ');
+            let short = normalized;
+            let link = '';
+            if (normalized.length > limit) {
+                short = normalized.substring(0, limit) + '...';
+                link = ` <a href="#" onclick="showDetail('${encodeURIComponent(text)}');return false;">Xem thêm</a>`;
+            }
+            return escapeHtml(short) + link;
+        }
+
+        // Hiển thị nội dung chi tiết trong modal
+        function showDetail(encoded) {
+            const content = decodeURIComponent(encoded);
+            document.getElementById('detail-content').innerHTML = escapeHtml(content).replace(/\n/g, '<br>');
+            document.getElementById('detail-modal').style.display = 'block';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         // Hiển thị danh sách sản phẩm
         function displayProducts() {
             const tbody = document.getElementById('products-tbody');
@@ -1646,9 +1796,9 @@
                 row.innerHTML = `
                     <td>Buổi ${product.session}</td>
                     <td>${product.name}</td>
-                    <td>${product.idea}</td>
-                    <td>${product.classTask}</td>
-                    <td>${product.homework}</td>
+                    <td>${renderTruncated(product.idea)}</td>
+                    <td>${renderTruncated(product.classTask)}</td>
+                    <td>${renderTruncated(product.homework)}</td>
                     <td>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: ${product.progress}%">
@@ -1656,7 +1806,7 @@
                             </div>
                         </div>
                     </td>
-                    <td>${product.feedback}</td>
+                    <td>${renderTruncated(product.feedback)}</td>
                     <td>
                         <button class="btn" style="font-size: 12px; padding: 5px 10px;" onclick="showEditProductForm(${index})">Sửa</button>
                         <button class="btn btn-danger" style="font-size: 12px; padding: 5px 10px;" onclick="deleteProduct(${index})">Xóa</button>
