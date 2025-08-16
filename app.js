@@ -43,6 +43,9 @@ async function loadFromFirebase() {
             const saved = snap.data();
             data = saved.data || {};
             classInfo = saved.classInfo || {};
+
+            localStorage.setItem(STORAGE_KEYS.DATA, JSON.stringify(data));
+            localStorage.setItem(STORAGE_KEYS.CLASS_INFO, JSON.stringify(classInfo));
         }
     } catch (err) {
         console.error('Firebase load error', err);
@@ -65,7 +68,13 @@ function loginAdmin(e) {
     e.preventDefault();
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
+
+    signInWithEmailAndPassword(auth, email, password)
+        .then(() => closeModal('login-modal'))
+        .catch(() => alert('Đăng nhập thất bại'));
+
     signInWithEmailAndPassword(auth, email, password).catch(() => alert('Đăng nhập thất bại'));
+
 }
 
 function logout() {
@@ -177,14 +186,24 @@ function updateAdminUI() {
         };
 
         // Lưu dữ liệu vào localStorage
+
+        async function saveToLocalStorage() {
+
         function saveToLocalStorage() {
+
             try {
                 localStorage.setItem(STORAGE_KEYS.DATA, JSON.stringify(data));
                 localStorage.setItem(STORAGE_KEYS.CLASS_INFO, JSON.stringify(classInfo));
                 showStorageStatus('💾 Đã lưu', false);
                 console.log('Dữ liệu đã được lưu vào localStorage');
+
+                await saveToFirebase();
+                saveToGoogleSheet();
+                performSearch();
+
                 saveToFirebase();
                 saveToGoogleSheet();
+
             } catch (error) {
                 console.error('Lỗi khi lưu vào localStorage:', error);
                 showStorageStatus('❌ Lỗi lưu trữ', true);
@@ -325,6 +344,9 @@ function updateAdminUI() {
             updateImportClassSelect();
             updateSearchFilters();
             updateAdminUI();
+
+            performSearch();
+
 
             initGoogleSheets();
             console.log('Ứng dụng đã được khởi tạo');
@@ -473,12 +495,19 @@ function updateAdminUI() {
 
                         let matchesProduct = false;
                         if (student.products) {
+
+                            const classType = (classInfo[className] && classInfo[className].type) || '';
+
                             matchesProduct = student.products.some(product =>
                                 product.name.toLowerCase().includes(searchTerm) ||
                                 product.idea.toLowerCase().includes(searchTerm) ||
                                 product.classTask.toLowerCase().includes(searchTerm) ||
                                 product.homework.toLowerCase().includes(searchTerm) ||
+
+                                feedbackToText(product, classType).toLowerCase().includes(searchTerm)
+
                                 feedbackToText(product, classInfo[className].type).toLowerCase().includes(searchTerm)
+
                             );
                         }
 
@@ -506,6 +535,18 @@ function updateAdminUI() {
             if (student.email && student.email.toLowerCase().includes(searchTerm)) return 'email';
             if (student.phone && student.phone.includes(searchTerm)) return 'phone';
 
+
+            if (student.products && student.products.some(p => {
+                const classType = (classInfo[className] && classInfo[className].type) || '';
+                return (
+                    p.name.toLowerCase().includes(searchTerm) ||
+                    p.idea.toLowerCase().includes(searchTerm) ||
+                    p.classTask.toLowerCase().includes(searchTerm) ||
+                    p.homework.toLowerCase().includes(searchTerm) ||
+                    feedbackToText(p, classType).toLowerCase().includes(searchTerm)
+                );
+            })) {
+
             if (student.products && student.products.some(p =>
                 p.name.toLowerCase().includes(searchTerm) ||
                 p.idea.toLowerCase().includes(searchTerm) ||
@@ -513,6 +554,7 @@ function updateAdminUI() {
                 p.homework.toLowerCase().includes(searchTerm) ||
                 feedbackToText(p, classInfo[className].type).toLowerCase().includes(searchTerm)
             )) {
+
                 return 'product';
             }
 
@@ -1174,6 +1216,49 @@ function updateAdminUI() {
             document.getElementById('feedback-modal').style.display = 'block';
         }
 
+        // Hiển thị nhận xét toàn bộ lớp
+        function showClassFeedback() {
+            const tbody = document.getElementById('class-feedback-body');
+            tbody.innerHTML = '';
+
+            const classData = data[currentClass];
+            if (!classData) {
+                tbody.innerHTML = '<tr><td colspan="4">Chưa có học viên.</td></tr>';
+            } else {
+                Object.keys(classData).forEach(studentName => {
+                    const student = classData[studentName];
+                    const products = [...student.products].sort((a, b) => a.session - b.session);
+                    if (products.length === 0) {
+                        const row = tbody.insertRow();
+                        row.innerHTML = `<td>${studentName}</td><td colspan="2">Chưa có nhận xét</td><td><button class="btn admin-only" onclick="openAddFromClass('${studentName}')">Thêm</button></td>`;
+                    } else {
+                        products.forEach((p, idx) => {
+                            const row = tbody.insertRow();
+                            row.innerHTML = `<td>${studentName}</td><td>Buổi ${p.session}</td><td>${renderTruncated(feedbackToText(p))}</td><td><button class="btn admin-only" onclick="openEditFromClass('${studentName}', ${idx})">Sửa</button></td>`;
+                        });
+                        const addRow = tbody.insertRow();
+                        addRow.innerHTML = `<td>${studentName}</td><td colspan="2"></td><td><button class="btn admin-only" onclick="openAddFromClass('${studentName}')">Thêm</button></td>`;
+                    }
+                });
+            }
+
+            document.getElementById('class-feedback-modal').style.display = 'block';
+            updateAdminUI();
+        }
+
+        function openAddFromClass(studentName) {
+            currentStudent = studentName;
+            closeModal('class-feedback-modal');
+            showAddProductForm();
+        }
+
+        function openEditFromClass(studentName, index) {
+            currentStudent = studentName;
+            closeModal('class-feedback-modal');
+            showEditProductForm(index);
+        }
+
+
         // Xóa sản phẩm
         function deleteProduct(index) {
             if (!requireAdmin()) return;
@@ -1595,6 +1680,8 @@ const exposed = {
     goBackToClass,
     showAddProductForm,
     showFeedbackHistory,
+    showClassFeedback,
+
     exportStudentData,
     addClass,
     addStudent,
@@ -1609,6 +1696,10 @@ const exposed = {
     showStudent,
     showFeedbackHistoryFromClass,
     showEditProductForm,
+
+    openAddFromClass,
+    openEditFromClass,
+
     closeModal,
     showDetail
 };
