@@ -10,7 +10,7 @@
 - Giao diện form nhập liệu được mở rộng, tự động xuống dòng với dữ liệu dài.
 - Mã nguồn được tách thành các file `index.html`, `style.css` và `app.js` để dễ quản lý.
 - Đăng nhập bằng Firebase Authentication để chỉ admin được chỉnh sửa, người xem không cần đăng nhập.
-- Dữ liệu được lưu cục bộ qua LocalStorage và tự động đồng bộ lên Firebase Firestore mỗi khi thay đổi.
+- Dữ liệu được lưu cục bộ qua LocalStorage và tự động đồng bộ lên Firebase Firestore mỗi khi thay đổi, kèm nút **Lưu dữ liệu** để đồng bộ thủ công.
 - Kết quả tìm kiếm và bộ lọc được cập nhật tức thì sau khi chỉnh sửa dữ liệu.
 
 ## Phát triển

@@ -1,3 +1,4 @@
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -194,6 +195,11 @@ function updateAdminUI() {
                 console.error('Lỗi khi lưu vào localStorage:', error);
                 showStorageStatus('❌ Lỗi lưu trữ', true);
             }
+        }
+
+        function manualSaveData() {
+            if (!requireAdmin()) return;
+            saveToLocalStorage();
         }
 
         // Tải dữ liệu từ localStorage
@@ -1103,7 +1109,7 @@ function updateAdminUI() {
         }
 
         // Rút gọn nội dung dài và tạo liên kết xem thêm
-        function renderTruncated(text) {
+        function renderTruncated(text, fromModal = '') {
             if (!text) return '';
             const limit = 50;
             const normalized = text.replace(/\n/g, ' ');
@@ -1111,16 +1117,30 @@ function updateAdminUI() {
             let link = '';
             if (normalized.length > limit) {
                 short = normalized.substring(0, limit) + '...';
-                link = ` <a href="#" onclick="showDetail('${encodeURIComponent(text)}');return false;">Xem thêm</a>`;
+                link = ` <a href="#" onclick="showDetail('${encodeURIComponent(text)}'${fromModal ? `, '${fromModal}'` : ''});return false;">Xem thêm</a>`;
             }
             return escapeHtml(short) + link;
         }
 
+        let previousModal = null;
+
         // Hiển thị nội dung chi tiết trong modal
-        function showDetail(encoded) {
+        function showDetail(encoded, fromModal = '') {
             const content = decodeURIComponent(encoded);
+            previousModal = fromModal || null;
+            if (previousModal) {
+                closeModal(previousModal);
+            }
             document.getElementById('detail-content').innerHTML = escapeHtml(content).replace(/\n/g, '<br>');
             document.getElementById('detail-modal').style.display = 'block';
+        }
+
+        function closeDetail() {
+            closeModal('detail-modal');
+            if (previousModal) {
+                document.getElementById(previousModal).style.display = 'block';
+                previousModal = null;
+            }
         }
 
         function escapeHtml(text) {
@@ -1208,7 +1228,7 @@ function updateAdminUI() {
                                 nameCell.textContent = studentName;
                             }
                             row.insertCell().textContent = `Buổi ${p.session}`;
-                            row.insertCell().innerHTML = renderTruncated(feedbackToText(p));
+                            row.insertCell().innerHTML = renderTruncated(feedbackToText(p), 'class-feedback-modal');
                             const actionCell = row.insertCell();
                             actionCell.innerHTML = `<button class="btn admin-only" onclick="openEditFromClass('${studentName}', ${idx})">Sửa</button>`;
                             if (idx === products.length - 1) {
@@ -1684,6 +1704,8 @@ const exposed = {
     openAddFromClass,
     openEditFromClass,
     closeModal,
-    showDetail
+    showDetail,
+    closeDetail,
+    manualSaveData
 };
 Object.assign(window, exposed);

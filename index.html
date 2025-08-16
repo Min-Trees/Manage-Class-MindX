@@ -20,6 +20,7 @@
                 <button class="nav-btn admin-only" onclick="showAddClassModal()">➕ Thêm lớp</button>
                 <button class="nav-btn" onclick="exportData()">📊 Xuất Excel</button>
                 <button class="nav-btn admin-only" onclick="showImportModal()">📁 Nhập Excel</button>
+                <button class="nav-btn admin-only" onclick="manualSaveData()">💾 Lưu dữ liệu</button>
                 <button class="nav-btn" id="login-btn" onclick="showLoginModal()">🔐 Đăng nhập</button>
                 <button class="nav-btn hidden" id="logout-btn" onclick="logout()">🚪 Đăng xuất</button>
             </div>
@@ -215,7 +216,7 @@
     <!-- Modal xem chi tiết -->
     <div id="detail-modal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal('detail-modal')">&times;</span>
+            <span class="close" onclick="closeDetail()">&times;</span>
             <h3>Chi tiết nội dung</h3>
             <div id="detail-content" style="white-space: pre-wrap;"></div>
         </div>
